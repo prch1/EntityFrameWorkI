@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,35 +16,67 @@ namespace Alura.Loja.Testes.ConsoleApp
         {
             using ( var contexto = new LojaContext())
             {
+                var serviceProvider = contexto.GetInfrastructure<IServiceProvider>();
+                var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+                loggerFactory.AddProvider(SqlLoggerProvider.Create());
+
                 var produtos = contexto.Produtos.ToList();
 
-                foreach (var p in produtos) 
-                {
-                    Console.WriteLine(p);
-                }
+                ExibeEntries(contexto.ChangeTracker.Entries());
 
-                //var p1 = produtos.First();
-                //p1.Nome = "Harry Potter E O Prisioneiro de Askaban";
+                //ADDed - Unchamged
+                //var novoProduto = new Produto()
+                //{
+                //    Nome = "Desinfetante",
+                //    Categoria = "Limpeza",
+                //    Preco = 2.99
+                //};
+
+                //contexto.Produtos.Add(novoProduto);
+
+                //ExibeEntries(contexto.ChangeTracker.Entries());
 
                 //contexto.SaveChanges();
 
-                Console.WriteLine("=================");
+                //ExibeEntries(contexto.ChangeTracker.Entries());
 
-                foreach(var e in contexto.ChangeTracker.Entries())
-                {
-                    Console.WriteLine(e.State);
-                }
+               
+                //UPDATE-Modified
+                //var p1 = produtos.Last();
+                //p1.Nome = "Percy Jackson o Ladrão de Raios";
 
-                var p1 = produtos.Last();
-                p1.Nome = "Harr Potter e as Reliquias da Morte";
+                //Console.WriteLine("=================");
+                //foreach (var e in contexto.ChangeTracker.Entries())
+                //{
+                //    Console.WriteLine(e);
+                //}
 
-                Console.WriteLine("=================");
+                //contexto.SaveChanges();
 
-                foreach (var e in contexto.ChangeTracker.Entries())
-                {
-                    Console.WriteLine(e.State);
-                }
 
+                //DELETED
+                var p1 = produtos.First();
+                contexto.Produtos.Remove(p1);
+
+                ExibeEntries(contexto.ChangeTracker.Entries());
+
+                //DETACHED
+                contexto.SaveChanges();
+
+                ExibeEntries(contexto.ChangeTracker.Entries());
+
+                var entry = contexto.Entry(p1);
+                Console.WriteLine("\n\n" + entry.Entity.ToString() + " - " + entry.State);
+
+            }
+        }
+
+        private static void ExibeEntries(IEnumerable<EntityEntry> entries)
+        {
+            Console.WriteLine("=================");
+            foreach (var e in entries)
+            {
+                Console.WriteLine(e.Entity.ToString() + " - " + e.State);
             }
         }
     }
