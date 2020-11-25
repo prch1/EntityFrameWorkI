@@ -14,28 +14,27 @@ namespace Alura.Loja.Testes.ConsoleApp
     {
         static void Main(string[] args)
         {
-                var paoFrances = new Produto();
-                paoFrances.Nome = "Pão";
-                paoFrances.PrecoUnidade = 0.40;
-                paoFrances.Unidade = "Unidade";
-                paoFrances.Categoria = "Padaria";
 
-                var compra = new Compra();
-                compra.Quantidade = 6;
-                compra.Produto = paoFrances;
-                compra.Preco = paoFrances.PrecoUnidade * compra.Quantidade;
+            var p1 = new Produto() { Nome = "Panettone", Categoria = "Comida", PrecoUnidade = 15.00, Unidade ="Gramas"};
+            var p2 = new Produto() { Nome = "Refrigerante", Categoria = "Bebidas", PrecoUnidade = 5.00, Unidade = "Litros" };
+            var p3 = new Produto() { Nome = "Arroz", Categoria = "Comida", PrecoUnidade = 35.00, Unidade = "Gramas" };
 
+            var promocaoNatal = new Promocao();
+            promocaoNatal.Descricao = "Natal Mais Feliz";
+            promocaoNatal.DataInicio = DateTime.Now;
+            promocaoNatal.DataTermino = DateTime.Now.AddMonths(2);
 
-            using(var contexto = new LojaContext())
+            promocaoNatal.IncluiProduto(p1);
+            promocaoNatal.IncluiProduto(p2);
+            promocaoNatal.IncluiProduto(p3);
+
+            using (var contexto = new LojaContext())
             {
                 var serviceProvider = contexto.GetInfrastructure<IServiceProvider>();
                 var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
                 loggerFactory.AddProvider(SqlLoggerProvider.Create());
 
-
-                contexto.Compras.Add(compra);
-
-
+                contexto.Promocaos.Add(promocaoNatal);
                 ExibeEntries(contexto.ChangeTracker.Entries());
 
                 contexto.SaveChanges();
@@ -50,8 +49,5 @@ namespace Alura.Loja.Testes.ConsoleApp
                 Console.WriteLine(e.Entity.ToString() + " - " + e.State);
             }
         }
-
-
-
     }
 }
