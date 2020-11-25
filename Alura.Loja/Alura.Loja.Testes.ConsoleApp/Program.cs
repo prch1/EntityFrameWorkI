@@ -34,8 +34,14 @@ namespace Alura.Loja.Testes.ConsoleApp
                 var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
                 loggerFactory.AddProvider(SqlLoggerProvider.Create());
 
-                contexto.Promocaos.Add(promocaoNatal);
-                ExibeEntries(contexto.ChangeTracker.Entries());
+                //add produto na promocao
+
+                //contexto.Promocaos.Add(promocaoNatal);
+                //ExibeEntries(contexto.ChangeTracker.Entries());
+
+               //remove promocao por cascata
+                var promocao = contexto.Promocaos.Find(1);
+                contexto.Promocaos.Remove(promocao);
 
                 contexto.SaveChanges();
 
