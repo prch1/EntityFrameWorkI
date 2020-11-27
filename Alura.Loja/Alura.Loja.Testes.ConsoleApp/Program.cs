@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -14,6 +15,100 @@ namespace Alura.Loja.Testes.ConsoleApp
     {
         static void Main(string[] args)
         {
+            using (var contexto = new LojaContext())
+            {
+
+                {
+                    var serviceProvider = contexto.GetInfrastructure<IServiceProvider>();
+                    var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+                    loggerFactory.AddProvider(SqlLoggerProvider.Create());
+
+                    var cliente = contexto
+                        .Clientes
+                        .Include(c => c.EnderecoDeEntrega)
+                        .FirstOrDefault();
+
+                    Console.WriteLine($"Endereco de Entrega : {cliente.EnderecoDeEntrega.Logradouro}");
+
+                    var produto = contexto
+                        .Produtos
+                        .Where(p => p.Id == 8)
+                        .FirstOrDefault();
+
+                    contexto.Entry(produto)
+                    .Collection(p => p.Compras)
+                    .Query()
+                    .Where(c => c.Preco > 1)
+                    .Load();
+
+
+                    Console.WriteLine($"Mostrando as compras do produto {produto.Nome}");
+
+                    foreach (var item in produto.Compras)
+                    {
+                        Console.WriteLine(item.Produto.Nome);
+                    }
+
+                }
+            }
+
+        }
+
+        private static void ExibeProdutoPromocao()
+        {
+            using (var contexto2 = new LojaContext())
+            {
+                var serviceProvider = contexto2.GetInfrastructure<IServiceProvider>();
+                var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+                loggerFactory.AddProvider(SqlLoggerProvider.Create());
+
+                var promocao = contexto2
+                              .Promocaos
+                              .Include(p => p.Produtos)
+                              .ThenInclude(pp => pp.Produto)
+                              .FirstOrDefault();
+
+                Console.WriteLine("\nMostrando os produtos da promoção...");
+
+                foreach (var item in promocao.Produtos)
+                {
+                    Console.WriteLine(item.Produto);
+                }
+
+            }
+        }
+
+        private static void IncluirPromocao()
+        {
+            using (var contexto = new LojaContext())
+            {
+               
+                
+                
+                var promocao = new Promocao();
+                promocao.Descricao = "Queima Total 2020";
+                promocao.DataInicio = new DateTime(2020, 12, 01);
+                promocao.DataTermino = new DateTime(2020, 12, 31);
+
+                var produtos = contexto
+                              .Produtos
+                              .Where(p => p.Categoria == "Bebidas")
+                              .ToList();
+
+                foreach (var item in produtos)
+                {
+                    promocao.IncluiProduto(item);
+                }
+
+                contexto.Promocaos.Add(promocao);
+
+                ExibeEntries(contexto.ChangeTracker.Entries());
+                contexto.SaveChanges();
+            }
+        }
+
+        private static void UmParaUm()
+        {
             var cli = new Cliente();
             cli.Nome = "Nick Jonas";
             cli.EnderecoDeEntrega = new Endereco()
@@ -25,7 +120,7 @@ namespace Alura.Loja.Testes.ConsoleApp
                 Cidade = "Ocean"
             };
 
-            using(var contexto = new LojaContext())
+            using (var contexto = new LojaContext())
             {
                 var serviceProvider = contexto.GetInfrastructure<IServiceProvider>();
                 var loggerFactory = serviceProvider.GetService<ILoggerFactory>();

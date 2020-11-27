@@ -1,4 +1,6 @@
-﻿namespace Alura.Loja.Testes.ConsoleApp
+﻿using System.Collections.Generic;
+
+namespace Alura.Loja.Testes.ConsoleApp
 {
     public class Compra
     {
@@ -8,5 +10,6 @@
         public int ProdutoId { get; set; }
         public Produto Produto { get; internal set; }
         public double Preco { get; internal set; }
+
     }
 }
