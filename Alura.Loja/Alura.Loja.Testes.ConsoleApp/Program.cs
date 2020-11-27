@@ -14,8 +14,32 @@ namespace Alura.Loja.Testes.ConsoleApp
     {
         static void Main(string[] args)
         {
+            var cli = new Cliente();
+            cli.Nome = "Nick Jonas";
+            cli.EnderecoDeEntrega = new Endereco()
+            {
+                Numero = 25,
+                Logradouro = "Rua X",
+                Complemento = "AAA",
+                Bairro = "Rural",
+                Cidade = "Ocean"
+            };
 
-            var p1 = new Produto() { Nome = "Panettone", Categoria = "Comida", PrecoUnidade = 15.00, Unidade ="Gramas"};
+            using(var contexto = new LojaContext())
+            {
+                var serviceProvider = contexto.GetInfrastructure<IServiceProvider>();
+                var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+                loggerFactory.AddProvider(SqlLoggerProvider.Create());
+
+                contexto.Clientes.Add(cli);
+                contexto.SaveChanges();
+            }
+        }
+
+        private static void MuitosParaMuitos()
+        {
+
+            var p1 = new Produto() { Nome = "Panettone", Categoria = "Comida", PrecoUnidade = 15.00, Unidade = "Gramas" };
             var p2 = new Produto() { Nome = "Refrigerante", Categoria = "Bebidas", PrecoUnidade = 5.00, Unidade = "Litros" };
             var p3 = new Produto() { Nome = "Arroz", Categoria = "Comida", PrecoUnidade = 35.00, Unidade = "Gramas" };
 
@@ -39,13 +63,13 @@ namespace Alura.Loja.Testes.ConsoleApp
                 //contexto.Promocaos.Add(promocaoNatal);
                 //ExibeEntries(contexto.ChangeTracker.Entries());
 
-               //remove promocao por cascata
+                //remove promocao por cascata
                 var promocao = contexto.Promocaos.Find(1);
                 contexto.Promocaos.Remove(promocao);
 
                 contexto.SaveChanges();
 
-            }     
+            }
         }
 
         private static void ExibeEntries(IEnumerable<EntityEntry> entries)

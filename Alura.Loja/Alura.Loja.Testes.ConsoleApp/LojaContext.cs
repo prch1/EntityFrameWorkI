@@ -8,7 +8,8 @@ namespace Alura.Loja.Testes.ConsoleApp
         public DbSet<Produto> Produtos { get; set; }
         public DbSet<Compra> Compras { get; set; }
         public DbSet<Promocao> Promocaos { get; set; }
-       
+        public DbSet<Cliente> Clientes { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -16,11 +17,25 @@ namespace Alura.Loja.Testes.ConsoleApp
                 .Entity<PromocaoProduto>()
                 .HasKey(pp => new { pp.PromocaoId, pp.ProdutoId });
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder
+                .Entity<Endereco>()
+                .ToTable("Enderecos");
+            
+            modelBuilder//ShadowProperty
+                .Entity<Endereco>()
+                .Property<int>("ClienteId");
+
+            modelBuilder
+                .Entity<Endereco>()
+                .HasKey("ClienteId");
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer("Server=DESKTOP-DD1QIU5\\SQLEXPRESS01;Database=LojaDB;Trusted_Connection=true;");
+        {   
+            optionsBuilder
+                .UseSqlServer("Server=DESKTOP-DD1QIU5\\SQLEXPRESS01;Database=LojaDB;Trusted_Connection=true;");
         }
     }
 
